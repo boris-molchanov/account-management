@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 import createError from "http-errors";
+import { ICreateUser } from "interfaces/create-user.dto";
+import { IUpdateUser } from "interfaces/update-user.dto";
 
 const prisma = new PrismaClient();
 const LIST_PER_PAGE = 10;
@@ -48,8 +50,11 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 	}
 
 	try {
+		const userData: ICreateUser = {
+			username, email, address, phone: userPhoneNumber
+		}
 		const newUser = await prisma.user.create({
-			data: { username, email, address, phone: userPhoneNumber },
+			data: userData,
 		});
 
 		return res.json(newUser);
@@ -62,16 +67,18 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 /* PUT */
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
 	try {
+		const updateUserData: IUpdateUser = {
+			username: req.body.username,
+			email: req.body.email,
+			address: req.body.address,
+			phone: req.body.phone,
+		}
+		
 		const user = await prisma.user.update({
 			where: {
 				id: parseInt(req.body.id)
 			},
-			data: {
-				username: req.body.username,
-				email: req.body.email,
-				address: req.body.address, 
-				phone: req.body.phone
-			}
+			data: updateUserData
 		});
 
 		res.status(200).json(user);
